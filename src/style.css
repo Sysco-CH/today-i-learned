@@ -214,9 +214,6 @@ ul {
 }
 
 @media (max-width: 1000px) {
-  body {
-    /* padding: 32px 48px; */
-  }
   .fact-form {
     flex-direction: column;
     align-items: stretch;
@@ -235,6 +232,18 @@ ul {
   }
 }
 @media (max-width: 600px) {
+  body {
+    padding: 20px 5px;
+  }
+
+  .logo {
+    align-items: flex-start;
+  }
+
+  .logo h1 {
+    font-size: 32px;
+  }
+
   #root {
     padding: 24px;
   }
