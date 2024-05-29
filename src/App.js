@@ -2,54 +2,34 @@ import { useEffect, useState } from "react";
 import "./style.css";
 import supabase from "./supabase";
 
-// function Counter() {
-//   const [count, setCount] = useState(0);
-//   console.log("Rendering");
-
-//   return (
-//     <div>
-//       <span style={{ fontSize: "40px" }}>{count}</span>
-//       <button className="btn btn-large" onClick={() => setCount((c) => c + 1)}>
-//         +1
-//       </button>
-//     </div>
-//   );
-// }
-
 function App() {
-  // 1. define state variable
   const [showForm, setShowForm] = useState(false);
   const [facts, setFacts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentCategory, setCurrentCategory] = useState("all");
 
-  useEffect(
-    function () {
-      async function getFacts() {
-        setIsLoading(true);
-        let query = supabase.from("facts").select("*");
+  useEffect(() => {
+    async function getFacts() {
+      setIsLoading(true);
+      let query = supabase.from("facts").select("*");
 
-        if (currentCategory !== "all")
-          query = query.eq("category", currentCategory);
+      if (currentCategory !== "all")
+        query = query.eq("category", currentCategory);
 
-        const { data: facts, error } = await query
-          .order("votesInteresting", { ascending: false })
-          .limit(1000);
+      const { data: facts, error } = await query
+        .order("votesInteresting", { ascending: false })
+        .limit(1000);
 
-        if (!error) setFacts(facts);
-        else alert("There was a problem getting data");
-        setFacts(facts);
-        setIsLoading(false);
-      }
-      getFacts();
-    },
-    [currentCategory]
-  );
+      if (!error) setFacts(facts);
+      else alert("There was a problem getting data");
+      setIsLoading(false);
+    }
+    getFacts();
+  }, [currentCategory]);
 
   return (
     <>
       <Header showForm={showForm} setShowForm={setShowForm} />
-      {/* 2. use state variable */}
       {showForm ? (
         <NewFactForm setFacts={setFacts} setShowForm={setShowForm} />
       ) : null}
@@ -70,26 +50,23 @@ function App() {
 function Loader() {
   return <p className="message">Loading...</p>;
 }
+
 function Header({ showForm, setShowForm }) {
   const appTitel = "Today I learned 🤓";
 
   return (
-    <>
-      {/* HEADER */}
-      <header className="header">
-        <div className="logo">
-          <img src="logo.png" alt="Logo" />
-          <h1>{appTitel}</h1>
-        </div>
-        <button
-          className="btn btn-large btn-open"
-          // 3. update state variable
-          onClick={() => setShowForm((show) => !show)}
-        >
-          {showForm ? "Close" : "Share a fact"}
-        </button>
-      </header>
-    </>
+    <header className="header">
+      <div className="logo">
+        <img src="logo.png" alt="Logo" />
+        <h1>{appTitel}</h1>
+      </div>
+      <button
+        className="btn btn-large btn-open"
+        onClick={() => setShowForm((show) => !show)}
+      >
+        {showForm ? "Close" : "Share a fact"}
+      </button>
+    </header>
   );
 }
 
@@ -123,25 +100,29 @@ function NewFactForm({ setFacts, setShowForm }) {
   const [isUploading, setIsUploading] = useState(false);
   const textLength = text.length;
 
+  useEffect(() => {
+    const isMobile = window.matchMedia("(max-width: 768px)").matches;
+
+    if (isMobile) {
+      // Select the input fields by their placeholder text
+      const textInput = document.querySelector(
+        'input[placeholder="Share a fact with the world..."]'
+      );
+      const sourceInput = document.querySelector(
+        'input[placeholder="Trustworthy source..."]'
+      );
+
+      // Blur the inputs if they are focused
+      if (textInput) textInput.blur();
+      if (sourceInput) sourceInput.blur();
+    }
+  }, []);
+
   async function handleSubmit(e) {
-    // 1. Prevent browser reload
     e.preventDefault();
     console.log(text, source, category);
 
-    // 2. Check if data is valid. If so, create a new fact
     if (text && isValidHttpUrl(source) && category && textLength <= 200) {
-      //3. Create a new fact object
-      // const newFact = {
-      //   id: Math.round(Math.random() * 10000000),
-      //   text,
-      //   source,
-      //   category,
-      //   votesInteresting: 0,
-      //   votesMindblowing: 0,
-      //   votesFalse: 0,
-      //   createdIn: new Date().getFullYear(),
-      // };
-      // 3. Upload fact to Supabase and receive the new fact object
       setIsUploading(true);
       const { data: newFact, error } = await supabase
         .from("facts")
@@ -149,13 +130,10 @@ function NewFactForm({ setFacts, setShowForm }) {
         .select();
       setIsUploading(false);
 
-      // 4. Add the new fact to the UI: add the fact to state
       if (!error) setFacts((facts) => [newFact[0], ...facts]);
-      // 5. Reset input fields
       setText("");
       setSource("");
       setCategory("");
-      // 6. Close the form
       setShowForm(false);
     }
   }
