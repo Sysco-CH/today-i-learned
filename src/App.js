@@ -101,7 +101,7 @@ function NewFactForm({ setFacts, setShowForm }) {
   const textLength = text.length;
 
   useEffect(() => {
-    const isMobile = window.matchMedia("(max-width: 768px)").matches;
+    const isMobile = window.matchMedia("(max-width: 800px)").matches;
 
     if (isMobile) {
       // Select the input fields by their placeholder text
